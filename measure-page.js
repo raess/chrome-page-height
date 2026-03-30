@@ -128,7 +128,7 @@
           box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
           font: 600 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           letter-spacing: 0.01em;
-          pointer-events: auto;
+          pointer-events: none;
         }
         #${this.toastId} .chrome-page-height__header {
           display: flex;
@@ -167,6 +167,7 @@
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
+          pointer-events: auto;
         }
         #${this.toastId} .chrome-page-height__toggle-option {
           display: inline-flex;
