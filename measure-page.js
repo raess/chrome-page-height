@@ -114,6 +114,7 @@
           right: 20px;
           bottom: 20px;
           z-index: 2147483647;
+          box-sizing: border-box;
           width: min(360px, calc(100vw - 32px));
           max-width: min(360px, calc(100vw - 32px));
           padding: 12px 14px;
