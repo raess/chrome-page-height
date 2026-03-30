@@ -7,7 +7,6 @@
       this.styleId = "__chrome_page_height_toast_style__";
       this.cssPixelTo72DpiRatio = 72 / 96;
       this.numberFormatter = new Intl.NumberFormat();
-      this.mode = "page";
       this.enabled = false;
       this.lastRenderedMessage = null;
       this.resizeObserver = null;
@@ -15,7 +14,6 @@
       this.updateScheduled = false;
       this.handleViewportChange = this.scheduleUpdate.bind(this);
       this.handleScroll = this.scheduleUpdate.bind(this);
-      this.handleToggleClick = this.handleToggleClick.bind(this);
     }
 
     isEnabled() {
@@ -38,7 +36,6 @@
       }
 
       this.enabled = true;
-      this.mode = "page";
       this.ensureStyles();
       this.ensureToast();
       this.renderHeight();
@@ -76,7 +73,6 @@
       }
 
       this.enabled = false;
-      this.mode = "page";
       this.lastRenderedMessage = null;
       this.resizeObserver?.disconnect();
       this.resizeObserver = null;
@@ -118,8 +114,8 @@
           right: 20px;
           bottom: 20px;
           z-index: 2147483647;
-          display: grid;
-          gap: 4px;
+          box-sizing: border-box;
+          width: min(360px, calc(100vw - 32px));
           max-width: min(360px, calc(100vw - 32px));
           padding: 12px 14px;
           border-radius: 12px;
@@ -130,62 +126,54 @@
           letter-spacing: 0.01em;
           pointer-events: none;
         }
-        #${this.toastId} .chrome-page-height__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+        #${this.toastId} .chrome-page-height__table {
+          width: 100%;
+          border-collapse: collapse;
+          border-spacing: 0;
+          table-layout: fixed;
         }
-        #${this.toastId} .chrome-page-height__label {
-          display: block;
+        #${this.toastId} .chrome-page-height__table th,
+        #${this.toastId} .chrome-page-height__table td {
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+        }
+        #${this.toastId} .chrome-page-height__table th {
           font-size: 11px;
           font-weight: 700;
-          text-transform: uppercase;
           letter-spacing: 0.08em;
-          color: rgba(255, 255, 255, 0.7);
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.72);
         }
-        #${this.toastId} .chrome-page-height__primary {
-          display: block;
+        #${this.toastId} .chrome-page-height__table td {
+          font-size: 14px;
+          color: #ffffff;
+          font-variant-numeric: tabular-nums;
+        }
+        #${this.toastId} .chrome-page-height__table th:first-child,
+        #${this.toastId} .chrome-page-height__table td:first-child {
+          padding-right: 18px;
+          text-align: left;
           font-weight: 700;
         }
-        #${this.toastId} .chrome-page-height__secondary {
-          display: block;
-          font-size: 13px;
+        #${this.toastId} .chrome-page-height__table th:nth-child(2),
+        #${this.toastId} .chrome-page-height__table th:nth-child(3),
+        #${this.toastId} .chrome-page-height__table td:nth-child(2),
+        #${this.toastId} .chrome-page-height__table td:nth-child(3) {
+          text-align: right;
+        }
+        #${this.toastId} .chrome-page-height__table td:nth-child(2),
+        #${this.toastId} .chrome-page-height__table td:nth-child(3) {
           font-weight: 500;
-          color: rgba(255, 255, 255, 0.6);
+          color: rgba(255, 255, 255, 0.88);
         }
-        #${this.toastId} .chrome-page-height__toggle {
-          display: inline-grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 2px;
-          padding: 2px;
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.08);
-          color: rgba(255, 255, 255, 0.68);
-          font: 600 10px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          cursor: pointer;
-          pointer-events: auto;
+        #${this.toastId} .chrome-page-height__table thead th {
+          border-top: 0;
         }
-        #${this.toastId} .chrome-page-height__toggle-option {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 54px;
-          padding: 5px 8px;
-          border-radius: 999px;
-          transition: background 140ms ease, color 140ms ease;
+        #${this.toastId} .chrome-page-height__column--label {
+          width: 28%;
         }
-        #${this.toastId} .chrome-page-height__toggle[data-mode="page"] .chrome-page-height__toggle-option--page,
-        #${this.toastId} .chrome-page-height__toggle[data-mode="scroll"] .chrome-page-height__toggle-option--scroll {
-          background: rgba(255, 255, 255, 0.95);
-          color: #101010;
-        }
-        #${this.toastId} .chrome-page-height__toggle:focus-visible {
-          outline: 2px solid rgba(255, 255, 255, 0.9);
-          outline-offset: 2px;
+        #${this.toastId} .chrome-page-height__column--value {
+          width: 36%;
         }
       `;
 
@@ -208,47 +196,75 @@
       toast.setAttribute("role", "status");
       toast.setAttribute("aria-live", "polite");
 
-      const header = document.createElement("div");
-      header.className = "chrome-page-height__header";
+      const table = document.createElement("table");
+      table.className = "chrome-page-height__table";
 
-      const label = document.createElement("span");
-      label.className = "chrome-page-height__label";
-      header.appendChild(label);
+      const colgroup = document.createElement("colgroup");
+      const labelColumn = document.createElement("col");
+      labelColumn.className = "chrome-page-height__column--label";
+      const firstValueColumn = document.createElement("col");
+      firstValueColumn.className = "chrome-page-height__column--value";
+      const secondValueColumn = document.createElement("col");
+      secondValueColumn.className = "chrome-page-height__column--value";
+      colgroup.append(labelColumn, firstValueColumn, secondValueColumn);
 
-      const toggle = document.createElement("button");
-      toggle.className = "chrome-page-height__toggle";
-      toggle.type = "button";
-      toggle.setAttribute("aria-label", "Toggle height mode");
-      toggle.addEventListener("click", this.handleToggleClick);
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
 
-      const pageOption = document.createElement("span");
-      pageOption.className = "chrome-page-height__toggle-option chrome-page-height__toggle-option--page";
-      pageOption.textContent = "Page";
+      const pxHeader = document.createElement("th");
+      pxHeader.scope = "col";
+      pxHeader.textContent = "PX";
 
-      const scrollOption = document.createElement("span");
-      scrollOption.className = "chrome-page-height__toggle-option chrome-page-height__toggle-option--scroll";
-      scrollOption.textContent = "Scroll";
+      const dpi72Header = document.createElement("th");
+      dpi72Header.scope = "col";
+      dpi72Header.textContent = "@72 dpi";
 
-      toggle.append(pageOption, scrollOption);
-      header.appendChild(toggle);
+      const dpi96Header = document.createElement("th");
+      dpi96Header.scope = "col";
+      dpi96Header.textContent = "@ 96 dpi";
 
-      const primary = document.createElement("span");
-      primary.className = "chrome-page-height__primary";
+      headerRow.append(pxHeader, dpi72Header, dpi96Header);
+      thead.appendChild(headerRow);
 
-      const secondary = document.createElement("span");
-      secondary.className = "chrome-page-height__secondary";
+      const tbody = document.createElement("tbody");
 
-      toast.append(header, primary, secondary);
+      const scrollRow = document.createElement("tr");
+      scrollRow.className = "chrome-page-height__row chrome-page-height__row--scroll";
+
+      const scrollLabel = document.createElement("td");
+      scrollLabel.textContent = "Scroll";
+
+      const scroll72 = document.createElement("td");
+      scroll72.className = "chrome-page-height__value chrome-page-height__value--scroll-72";
+
+      const scroll96 = document.createElement("td");
+      scroll96.className = "chrome-page-height__value chrome-page-height__value--scroll-96";
+
+      scrollRow.append(scrollLabel, scroll72, scroll96);
+
+      const pageRow = document.createElement("tr");
+      pageRow.className = "chrome-page-height__row chrome-page-height__row--page";
+
+      const pageLabel = document.createElement("td");
+      pageLabel.textContent = "Page";
+
+      const page72 = document.createElement("td");
+      page72.className = "chrome-page-height__value chrome-page-height__value--page-72";
+
+      const page96 = document.createElement("td");
+      page96.className = "chrome-page-height__value chrome-page-height__value--page-96";
+
+      pageRow.append(pageLabel, page72, page96);
+      tbody.append(scrollRow, pageRow);
+      table.append(colgroup, thead, tbody);
+      toast.appendChild(table);
       container.appendChild(toast);
 
       return toast;
     }
 
     removeToast() {
-      const toast = document.getElementById(this.toastId);
-      const toggle = toast?.querySelector(".chrome-page-height__toggle");
-      toggle?.removeEventListener("click", this.handleToggleClick);
-      toast?.remove();
+      document.getElementById(this.toastId)?.remove();
     }
 
     isInternalMutation(mutation) {
@@ -276,14 +292,6 @@
       return this.numberFormatter.format(value);
     }
 
-    handleToggleClick(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      this.mode = this.mode === "page" ? "scroll" : "page";
-      this.lastRenderedMessage = null;
-      this.renderHeight();
-    }
-
     getScrollHeight(pageHeight) {
       const scrollOffset =
         window.scrollY ??
@@ -303,34 +311,32 @@
       }
 
       const toast = this.ensureToast();
-      const labelNode = toast?.querySelector(".chrome-page-height__label");
-      const toggleNode = toast?.querySelector(".chrome-page-height__toggle");
-      const primaryNode = toast?.querySelector(".chrome-page-height__primary");
-      const secondaryNode = toast?.querySelector(".chrome-page-height__secondary");
+      const scroll72Node = toast?.querySelector(".chrome-page-height__value--scroll-72");
+      const scroll96Node = toast?.querySelector(".chrome-page-height__value--scroll-96");
+      const page72Node = toast?.querySelector(".chrome-page-height__value--page-72");
+      const page96Node = toast?.querySelector(".chrome-page-height__value--page-96");
 
-      if (!labelNode || !toggleNode || !primaryNode || !secondaryNode) {
+      if (!scroll72Node || !scroll96Node || !page72Node || !page96Node) {
         return;
       }
 
       const pageHeight = this.getDocumentHeight();
-      const cssHeight = this.mode === "page" ? pageHeight : this.getScrollHeight(pageHeight);
-      const title = this.mode === "page" ? "PAGE HEIGHT" : "SCROLL HEIGHT";
-      const toggleState = this.mode;
-      const heightAt72Dpi = Math.round(cssHeight * this.cssPixelTo72DpiRatio);
-      const primaryMessage = `${this.formatNumber(heightAt72Dpi)} px @ 72 dpi`;
-      const secondaryMessage = `${this.formatNumber(cssHeight)} CSS px @ 96 dpi`;
-      const message = `${title}\n${toggleState}\n${primaryMessage}\n${secondaryMessage}`;
+      const scrollHeight = this.getScrollHeight(pageHeight);
+      const scroll72 = this.formatNumber(Math.round(scrollHeight * this.cssPixelTo72DpiRatio));
+      const scroll96 = this.formatNumber(scrollHeight);
+      const page72 = this.formatNumber(Math.round(pageHeight * this.cssPixelTo72DpiRatio));
+      const page96 = this.formatNumber(pageHeight);
+      const message = `${scroll72}\n${scroll96}\n${page72}\n${page96}`;
 
       if (message === this.lastRenderedMessage) {
         return;
       }
 
       this.lastRenderedMessage = message;
-      labelNode.textContent = title;
-      toggleNode.dataset.mode = toggleState;
-      toggleNode.setAttribute("aria-pressed", String(toggleState === "scroll"));
-      primaryNode.textContent = primaryMessage;
-      secondaryNode.textContent = secondaryMessage;
+      scroll72Node.textContent = scroll72;
+      scroll96Node.textContent = scroll96;
+      page72Node.textContent = page72;
+      page96Node.textContent = page96;
     }
   }
 
