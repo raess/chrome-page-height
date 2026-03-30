@@ -7,6 +7,7 @@
       this.styleId = "__chrome_page_height_toast_style__";
       this.cssPixelTo72DpiRatio = 72 / 96;
       this.enabled = false;
+      this.lastRenderedMessage = null;
       this.resizeObserver = null;
       this.mutationObserver = null;
       this.updateScheduled = false;
@@ -48,7 +49,13 @@
         }
       }
 
-      this.mutationObserver = new MutationObserver(() => this.scheduleUpdate());
+      this.mutationObserver = new MutationObserver((mutations) => {
+        const hasExternalMutation = mutations.some((mutation) => !this.isInternalMutation(mutation));
+
+        if (hasExternalMutation) {
+          this.scheduleUpdate();
+        }
+      });
       this.mutationObserver.observe(document.documentElement, {
         childList: true,
         subtree: true,
@@ -63,6 +70,7 @@
       }
 
       this.enabled = false;
+      this.lastRenderedMessage = null;
       this.resizeObserver?.disconnect();
       this.resizeObserver = null;
       this.mutationObserver?.disconnect();
@@ -173,6 +181,15 @@
       document.getElementById(this.toastId)?.remove();
     }
 
+    isInternalMutation(mutation) {
+      const toast = document.getElementById(this.toastId);
+      if (!toast) {
+        return false;
+      }
+
+      return mutation.target === toast || toast.contains(mutation.target);
+    }
+
     scheduleUpdate() {
       if (!this.enabled || this.updateScheduled) {
         return;
@@ -199,7 +216,14 @@
 
       const cssHeight = this.getDocumentHeight();
       const heightAt72Dpi = Math.round(cssHeight * this.cssPixelTo72DpiRatio);
-      valueNode.textContent = `${heightAt72Dpi.toLocaleString()} px @ 72 dpi (${cssHeight.toLocaleString()} CSS px)`;
+      const message = `${heightAt72Dpi.toLocaleString()} px @ 72 dpi (${cssHeight.toLocaleString()} CSS px)`;
+
+      if (message === this.lastRenderedMessage) {
+        return;
+      }
+
+      this.lastRenderedMessage = message;
+      valueNode.textContent = message;
     }
   }
 
