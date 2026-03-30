@@ -151,9 +151,15 @@
         }
         #${this.toastId} .chrome-page-height__table th:first-child,
         #${this.toastId} .chrome-page-height__table td:first-child {
-          padding-right: 18px;
           text-align: left;
           font-weight: 700;
+        }
+        #${this.toastId} .chrome-page-height__table td:first-child {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.72);
+          font-variant-numeric: normal;
         }
         #${this.toastId} .chrome-page-height__table th:nth-child(2),
         #${this.toastId} .chrome-page-height__table th:nth-child(3),
@@ -170,10 +176,10 @@
           border-top: 0;
         }
         #${this.toastId} .chrome-page-height__column--label {
-          width: 28%;
+          width: 33.333%;
         }
         #${this.toastId} .chrome-page-height__column--value {
-          width: 36%;
+          width: 33.333%;
         }
       `;
 
@@ -213,7 +219,7 @@
 
       const pxHeader = document.createElement("th");
       pxHeader.scope = "col";
-      pxHeader.textContent = "PX";
+      pxHeader.textContent = "HEIGHT (PX)";
 
       const dpi72Header = document.createElement("th");
       dpi72Header.scope = "col";
