@@ -6,6 +6,7 @@
       this.toastId = "__chrome_page_height_toast__";
       this.styleId = "__chrome_page_height_toast_style__";
       this.cssPixelTo72DpiRatio = 72 / 96;
+      this.numberFormatter = new Intl.NumberFormat();
       this.enabled = false;
       this.lastRenderedMessage = null;
       this.resizeObserver = null;
@@ -130,12 +131,13 @@
           letter-spacing: 0.08em;
           color: rgba(255, 255, 255, 0.7);
         }
-        #${this.toastId} .chrome-page-height__value {
+        #${this.toastId} .chrome-page-height__primary {
           display: block;
+          font-weight: 700;
         }
-        #${this.toastId} .chrome-page-height__hint {
+        #${this.toastId} .chrome-page-height__secondary {
           display: block;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
           color: rgba(255, 255, 255, 0.6);
         }
@@ -162,16 +164,15 @@
 
       const label = document.createElement("span");
       label.className = "chrome-page-height__label";
-      label.textContent = "Page Height";
+      label.textContent = "PAGE HEIGHT";
 
-      const value = document.createElement("span");
-      value.className = "chrome-page-height__value";
+      const primary = document.createElement("span");
+      primary.className = "chrome-page-height__primary";
 
-      const hint = document.createElement("span");
-      hint.className = "chrome-page-height__hint";
-      hint.textContent = "Click the extension icon again to turn this off.";
+      const secondary = document.createElement("span");
+      secondary.className = "chrome-page-height__secondary";
 
-      toast.append(label, value, hint);
+      toast.append(label, primary, secondary);
       container.appendChild(toast);
 
       return toast;
@@ -202,28 +203,36 @@
       });
     }
 
+    formatNumber(value) {
+      return this.numberFormatter.format(value);
+    }
+
     renderHeight() {
       if (!this.enabled) {
         return;
       }
 
       const toast = this.ensureToast();
-      const valueNode = toast?.querySelector(".chrome-page-height__value");
+      const primaryNode = toast?.querySelector(".chrome-page-height__primary");
+      const secondaryNode = toast?.querySelector(".chrome-page-height__secondary");
 
-      if (!valueNode) {
+      if (!primaryNode || !secondaryNode) {
         return;
       }
 
       const cssHeight = this.getDocumentHeight();
       const heightAt72Dpi = Math.round(cssHeight * this.cssPixelTo72DpiRatio);
-      const message = `${heightAt72Dpi.toLocaleString()} px @ 72 dpi (${cssHeight.toLocaleString()} CSS px)`;
+      const primaryMessage = `${this.formatNumber(heightAt72Dpi)} px @ 72 dpi`;
+      const secondaryMessage = `${this.formatNumber(cssHeight)} CSS px @ 96 dpi`;
+      const message = `${primaryMessage}\n${secondaryMessage}`;
 
       if (message === this.lastRenderedMessage) {
         return;
       }
 
       this.lastRenderedMessage = message;
-      valueNode.textContent = message;
+      primaryNode.textContent = primaryMessage;
+      secondaryNode.textContent = secondaryMessage;
     }
   }
 
