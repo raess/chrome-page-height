@@ -1,8 +1,10 @@
 (() => {
   const controllerKey = "__chromePageHeightOverlay";
+  const controllerVersion = 2;
 
   class PageHeightOverlayController {
     constructor() {
+      this.version = controllerVersion;
       this.toastId = "__chrome_page_height_toast__";
       this.styleId = "__chrome_page_height_toast_style__";
       this.cssPixelTo72DpiRatio = 72 / 96;
@@ -151,9 +153,15 @@
         }
         #${this.toastId} .chrome-page-height__table th:first-child,
         #${this.toastId} .chrome-page-height__table td:first-child {
-          padding-right: 18px;
           text-align: left;
           font-weight: 700;
+        }
+        #${this.toastId} .chrome-page-height__table td:first-child {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.72);
+          font-variant-numeric: normal;
         }
         #${this.toastId} .chrome-page-height__table th:nth-child(2),
         #${this.toastId} .chrome-page-height__table th:nth-child(3),
@@ -170,10 +178,10 @@
           border-top: 0;
         }
         #${this.toastId} .chrome-page-height__column--label {
-          width: 28%;
+          width: 33.333%;
         }
         #${this.toastId} .chrome-page-height__column--value {
-          width: 36%;
+          width: 33.333%;
         }
       `;
 
@@ -213,7 +221,7 @@
 
       const pxHeader = document.createElement("th");
       pxHeader.scope = "col";
-      pxHeader.textContent = "PX";
+      pxHeader.textContent = "HEIGHT (PX)";
 
       const dpi72Header = document.createElement("th");
       dpi72Header.scope = "col";
@@ -343,10 +351,12 @@
   let controller = globalThis[controllerKey];
   const hasControllerShape =
     controller &&
+    controller.version === controllerVersion &&
     typeof controller.toggle === "function" &&
     typeof controller.isEnabled === "function";
 
   if (!hasControllerShape) {
+    controller?.disable?.();
     controller = new PageHeightOverlayController();
     globalThis[controllerKey] = controller;
   }
