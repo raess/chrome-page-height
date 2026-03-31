@@ -1,8 +1,10 @@
 (() => {
   const controllerKey = "__chromePageHeightOverlay";
+  const controllerVersion = 2;
 
   class PageHeightOverlayController {
     constructor() {
+      this.version = controllerVersion;
       this.toastId = "__chrome_page_height_toast__";
       this.styleId = "__chrome_page_height_toast_style__";
       this.cssPixelTo72DpiRatio = 72 / 96;
@@ -349,10 +351,12 @@
   let controller = globalThis[controllerKey];
   const hasControllerShape =
     controller &&
+    controller.version === controllerVersion &&
     typeof controller.toggle === "function" &&
     typeof controller.isEnabled === "function";
 
   if (!hasControllerShape) {
+    controller?.disable?.();
     controller = new PageHeightOverlayController();
     globalThis[controllerKey] = controller;
   }
