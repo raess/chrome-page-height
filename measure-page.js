@@ -1,6 +1,6 @@
 (() => {
   const controllerKey = "__chromePageHeightOverlay";
-  const controllerVersion = 2;
+  const controllerVersion = 3;
 
   class PageHeightOverlayController {
     constructor() {
@@ -191,7 +191,17 @@
     ensureToast() {
       let toast = document.getElementById(this.toastId);
       if (toast) {
-        return toast;
+        const hasExpectedStructure =
+          toast.querySelector(".chrome-page-height__value--scroll-72") &&
+          toast.querySelector(".chrome-page-height__value--scroll-96") &&
+          toast.querySelector(".chrome-page-height__value--page-72") &&
+          toast.querySelector(".chrome-page-height__value--page-96");
+
+        if (hasExpectedStructure) {
+          return toast;
+        }
+
+        toast.remove();
       }
 
       const container = this.getContainer();
