@@ -1,11 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
   <title id="title">Chrome Page Height measuring tape icon</title>
-  <desc id="desc">Circular purple icon with a white measuring tape symbol.</desc>
-  <circle cx="64" cy="64" r="56" fill="#7c3aed"/>
-  <svg x="21" y="21" width="86" height="86" viewBox="0 -960 960 960" aria-hidden="true">
+  <desc id="desc">Single-color outline measuring tape symbol on a transparent background.</desc>
+  <rect width="128" height="128" fill="none"/>
+  <g transform="translate(64 66) scale(1.24) translate(-64 -64)" aria-hidden="true">
     <path
-      fill="#ffffff"
-      d="M200-160v-340q0-142 99-241t241-99q142 0 241 99t99 241q0 142-99 241t-241 99H200Zm60-60h280q116.31 0 198.15-81.78 81.85-81.79 81.85-198Q820-616 738.22-698q-81.79-82-198-82Q424-780 342-698.15 260-616.31 260-500v280Zm379-181q41-41 41-99t-41-99q-41-41-99-41t-99 41q-41 41-41 99t41 99q41 41 99 41t99-41Zm-155.5-42.26q-23.5-23.27-23.5-56.5 0-33.24 23.26-56.74 23.27-23.5 56.5-23.5 33.24 0 56.74 23.26 23.5 23.27 23.5 56.5 0 33.24-23.26 56.74-23.27 23.5-56.5 23.5-33.24 0-56.74-23.26ZM80-160v-200h60v200H80Zm460-340Z"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="12"
+      stroke-linejoin="miter"
+      d="M28 104H64C87.196 104 106 85.196 106 62S87.196 20 64 20 22 38.804 22 62V98C22 101.314 24.686 104 28 104Z"
     />
-  </svg>
+    <circle
+      cx="64"
+      cy="60"
+      r="12"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="12"
+    />
+  </g>
 </svg>
